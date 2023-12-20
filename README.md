@@ -8,6 +8,9 @@ Welcome to the Vulpes Game Engine, a game engine written in C. Drawing inspirati
 
 - **Cross-platform:** Vulpes aims to support both Windows and Linux system, with the possibility of MacOS and more in the future
 
+## Dependencies
+- **Vulkan:** Vulpes' renderer is currently planned to be built around the Vulkan Graphics API, with plans for support for OpenGL and DirectX in the future.
+
 ## Getting Started
 
 To get started with Vulpes, follow these simple steps:
