@@ -55,7 +55,7 @@ VAPI void log_output(log_level level, const char* message, ...);
 #if LOG_TRACE_ENABLED == 1
 #define VTRACE(message, ...) log_output(LOG_LEVEL_TRACE, message, ##__VA_ARGS__);
 #else
-#define VTARCE(message, ...) 
+#define VTRACE(message, ...) 
 #endif
 
 #endif

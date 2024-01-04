@@ -44,7 +44,7 @@ VAPI void report_assertion_failure(const char* expression, const char* message, 
         }                                                               \
     }                                                                   
 #else
-#define KASSERT_DEBUG(expr) // does nothing
+#define VASSERT_DEBUG(expr) // does nothing
 #endif
 
 #else
