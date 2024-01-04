@@ -122,7 +122,12 @@ b8 vulkan_renderer_backend_initialize(renderer_backend* backend, const char* app
     #endif
 
     // Surface Creation
-    
+    VDEBUG("Creating Vulkan surface...");
+    if(!platform_create_vulkan_surface(plat_state, &context)){
+        VERROR("Failed to create platform surface!");
+        return FALSE;
+    }
+    VDEBUG("Vulkan surface created.");
 
     // Device Creation
     if(!vulkan_device_create(&context)){
