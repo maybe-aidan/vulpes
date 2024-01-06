@@ -2,6 +2,7 @@
 #include "vulkan_types.inl"
 #include "vulkan_platform.h"
 #include "vulkan_device.h"
+#include "vulkan_swapchain.h"
 
 #include "../../core/logger.h"
 #include "../../core/vstring.h"
@@ -17,7 +18,12 @@ VKAPI_ATTR VkBool32 VKAPI_CALL vk_debug_callback(
     const VkDebugUtilsMessengerCallbackDataEXT* callback_data,
     void* user_data);
 
+i32 find_memory_index(u32 type_filter, u32 property_flags);
+
 b8 vulkan_renderer_backend_initialize(renderer_backend* backend, const char* application_name, struct platform_state* plat_state){
+
+    // Function pointers
+    context.find_memory_index = find_memory_index;
 
     // TODO: Custom allocator
     context.allocator = 0;
@@ -135,11 +141,27 @@ b8 vulkan_renderer_backend_initialize(renderer_backend* backend, const char* app
         return FALSE;
     }
 
+    // Swapchain
+    vulkan_swapchain_create(&context, context.framebuffer_width, context.framebuffer_height, &context.swapchain);
+
     VINFO("Vulkan renderer initialized succesfully!");
     return TRUE;
 }
 
 void vulkan_renderer_backend_shutdown(renderer_backend* backend){
+    // Destroy in opposite order of creation.
+
+    // Swapchain
+    vulkan_swapchain_destroy(&context, &context.swapchain);
+
+    VDEBUG("Destroying Vulkan device...");
+    vulkan_device_destroy(&context);
+
+    VDEBUG("Destroying Vulkan surface...");
+    if(context.surface) {
+        vkDestroySurfaceKHR(context.instance, context.surface, context.allocator);
+        context.surface = 0;
+    }
 
     #if defined(_DEBUG)
         VDEBUG("Destroying Vulkan debugger...");
@@ -188,4 +210,19 @@ VKAPI_ATTR VkBool32 VKAPI_CALL vk_debug_callback(
     }
     return VK_FALSE;
 
+}
+
+i32 find_memory_index(u32 type_filter, u32 property_flags){
+    VkPhysicalDeviceMemoryProperties memory_properties;
+    vkGetPhysicalDeviceMemoryProperties(context.device.physical_device, &memory_properties);
+
+    for(u32 i = 0; i < memory_properties.memoryTypeCount; ++i){
+        // Check each memory type to see if its bit is set to 1.
+        if(type_filter & (1 << i) && (memory_properties.memoryTypes[i].propertyFlags & property_flags) == property_flags){
+            return 1;
+        }
+    }
+
+    VWARN("Unable to find suitable memory type!");
+    return -1;
 }
